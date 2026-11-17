@@ -1,0 +1,51 @@
+{{define "base"}}<!doctype html>
+<html lang="{{lang}}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{.Title}} {{t "· Студенческие общежития"}}</title>
+  <link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+  <a class="skip-link" href="#main-content">{{t "Перейти к содержимому"}}</a>
+  <header class="site-header">
+    <div class="container header-top">
+      <a class="brand" href="{{url "/"}}" aria-label="{{t "Студенческие общежития — главная"}}"><span class="brand-mark" aria-hidden="true">{{t "Д"}}</span><span>{{t "Студенческие общежития"}}<small>{{t "Фонд и доступ к общежитиям"}}</small></span></a>
+      <div class="header-actions">
+ <nav class="language-switch" aria-label="{{t "Выбор языка"}}"><a href="{{languageURL "ru"}}" lang="ru" {{if eq lang "ru"}}aria-current="true"{{end}}>{{t "Русский"}}</a><a href="{{languageURL "kk"}}" lang="kk" {{if eq lang "kk"}}aria-current="true"{{end}}>{{t "Қазақша"}}</a></nav>
+        {{if .Navigation.LoginEnabled}}<span class="badge badge-warm">{{t "Тестовый режим"}}</span>{{end}}
+        {{if .Navigation.Authenticated}}
+          <a class="profile-link" href="{{url "/account"}}">{{.Navigation.DisplayName}}</a>
+          <form class="inline-form" action="{{url "/auth/logout"}}" method="post">
+            <input type="hidden" name="csrf_token" value="{{.Navigation.CSRFToken}}">
+            <button class="button button-quiet" type="submit">{{t "Выйти"}}</button>
+          </form>
+        {{else if .Navigation.LoginEnabled}}
+          <a class="button button-primary" href="{{url "/auth/login"}}">{{t "Войти"}}</a>
+        {{end}}
+      </div>
+    </div>
+    <nav class="container primary-nav" aria-label="{{t "Основная навигация"}}">
+      <a href="{{url "/"}}" {{if eq .Navigation.CurrentPath "/"}}aria-current="page"{{end}}>{{t "Главная"}}</a>
+      <a href="{{url "/catalog"}}" {{if eq .Navigation.CurrentPath "/catalog"}}aria-current="page"{{end}}>{{t "Каталог общежитий"}}</a>
+      {{if .Navigation.Authenticated}}
+        <a href="{{url "/account"}}" {{if eq .Navigation.CurrentPath "/account"}}aria-current="page"{{end}}>{{t "Мой кабинет"}}</a>
+        {{if .Navigation.CanUseApplications}}<a href="{{url "/applications"}}">{{t "Мои заявления"}}</a><a href="{{url "/student/profile"}}">{{t "Профиль студента"}}</a>{{end}}
+        <a href="{{url "/account/notifications"}}" {{if eq .Navigation.CurrentPath "/account/notifications"}}aria-current="page"{{end}}>{{t "Уведомления"}}{{if .Navigation.UnreadRoleNotifications}} <span class="badge">{{.Navigation.UnreadRoleNotifications}}</span>{{end}}</a>
+ {{if .Navigation.CanReviewApplications}}<a href="{{url "/staff/applications"}}">{{t "Назначенные заявления"}}</a>{{end}}
+ {{if .Navigation.CanAssignApplications}}<a href="{{url "/staff/application-assignments"}}">{{t "Назначение проверяющего"}}</a>{{end}}
+ {{if .Navigation.Dormitories}}<a href="{{url "/staff/dormitories"}}" {{if eq .Navigation.CurrentPath "/staff/dormitories"}}aria-current="page"{{end}}>{{t "Реестр фонда"}}</a>{{end}}
+        {{range .Navigation.Dormitories}}<a href="{{url (.URL)}}" {{if .Active}}aria-current="page"{{end}}>{{t "Общежитие ·"}} {{.Label}}</a>{{end}}
+        {{if .Navigation.CanReadStatistics}}<a href="{{url "/staff/statistics"}}" {{if eq .Navigation.CurrentPath "/staff/statistics"}}aria-current="page"{{end}}>{{t "Статистика реестра"}}</a>{{end}}
+ {{if .Navigation.CanExportRegistry}}<a href="{{url "/staff/registry-export"}}" {{if eq .Navigation.CurrentPath "/staff/registry-export"}}aria-current="page"{{end}}>{{t "Экспорт реестра"}}</a>{{end}}
+ {{if .Navigation.CanReadAudit}}<a href="{{url "/staff/history"}}" {{if eq .Navigation.CurrentPath "/staff/history"}}aria-current="page"{{end}}>{{t "История изменений реестра"}}</a>{{end}}
+ {{if .Navigation.CanReadUsers}}<a href="{{url "/admin/users"}}" {{if eq .Navigation.CurrentPath "/admin/users"}}aria-current="page"{{end}}>{{t "Учётные записи"}}</a>{{end}}
+      {{else if .Navigation.LoginEnabled}}
+        <a href="{{url "/auth/login"}}" {{if eq .Navigation.CurrentPath "/auth/login"}}aria-current="page"{{end}}>{{t "Вход в кабинет"}}</a>
+      {{end}}
+    </nav>
+  </header>
+  <main class="container page-main" id="main-content" tabindex="-1">{{template "content" .}}</main>
+  <footer class="container site-footer"><span>{{t "Студенческие общежития"}}</span><a href="{{url "/"}}">{{t "На главную"}}</a>{{if .Navigation.Authenticated}}<a href="{{url "/account"}}">{{t "В кабинет"}}</a>{{end}}</footer>
+</body>
+</html>{{end}}

@@ -1,0 +1,27 @@
+{{define "content"}}
+<div class="page-heading"><div><p class="eyebrow">{{t "Жилой фонд"}}</p><h1>{{t "Каталог общежитий"}}</h1><p class="lead">{{t "Фотографии, условия проживания и свободные места."}}</p></div></div>
+<section class="card"><form method="get" action="{{url "/catalog"}}" class="catalog-filters" role="search"><input type="hidden" name="lang" value="{{lang}}">
+<div class="field"><label for="name">{{t "Название"}}</label><input type="search" id="name" name="name" value="{{.Data.Query.Get "name"}}" maxlength="200"></div>
+<div class="field"><label for="address">{{t "Адрес"}}</label><input type="search" id="address" name="address" value="{{.Data.Query.Get "address"}}" maxlength="500"></div>
+<div class="field"><label for="min">{{t "Стоимость от"}}</label><input type="number" id="min" name="min" min="0" step="1" value="{{.Data.Query.Get "min"}}" aria-describedby="price-help"></div>
+<div class="field"><label for="max">{{t "Стоимость до"}}</label><input type="number" id="max" name="max" min="0" step="1" value="{{.Data.Query.Get "max"}}" aria-describedby="price-help"></div>
+<div class="field"><label for="currency">{{t "Валюта"}}</label><input id="currency" name="currency" maxlength="3" value="{{.Data.Query.Get "currency"}}" placeholder="KZT"></div>
+<div class="field"><label for="period">{{t "Период стоимости"}}</label><input id="period" name="period" maxlength="64" value="{{.Data.Query.Get "period"}}"></div>
+<label class="checkbox-field"><input type="checkbox" name="free" value="1" {{if eq (.Data.Query.Get "free") "1"}}checked{{end}}> {{t "Есть свободные места"}}</label>
+<label class="checkbox-field"><input type="checkbox" name="accessible" value="1" {{if eq (.Data.Query.Get "accessible") "1"}}checked{{end}}> {{t "Доступность для лиц с инвалидностью"}}</label>
+<div class="actions"><button class="button button-primary" type="submit">{{t "Найти"}}</button><a class="button button-secondary" href="{{url "/catalog"}}">{{t "Сбросить"}}</a></div>
+</form><p id="price-help" class="hint">{{t "Суммы указаны в минимальных денежных единицах. Для диапазона стоимости выберите валюту и точный период из карточки."}}</p></section>
+{{if .Data.Error}}<p class="alert alert-error" role="alert">{{t .Data.Error}}</p>{{else}}
+<p class="results-summary" role="status">{{t "Найдено:"}} <strong>{{.Data.Listing.Total}}</strong></p>
+<p class="hint">{{t "Сведения актуальны на"}} <time datetime="{{.Data.Listing.AsOf}}">{{.Data.Listing.AsOf}}</time> · UTC</p>
+<div class="catalog-grid">{{range .Data.Listing.Items}}<article class="card catalog-card">
+{{if .Photos}}{{with index .Photos 0}}<img class="catalog-cover" src="/photos/{{.ID}}" alt="{{.Description}}" width="{{.Width}}" height="{{.Height}}" loading="lazy">{{end}}{{else}}<div class="photo-placeholder">{{t "Фотографий пока нет."}}</div>{{end}}
+<h2><a href="{{url (catalogURL .ID)}}">{{.Name}}</a></h2><p>{{.Address}}</p>
+<dl class="profile-data"><div><dt>{{t "Свободных мест"}}</dt><dd>{{.Free}}</dd></div><div><dt>{{t "Всего действующих мест"}}</dt><dd>{{.Total}}</dd></div></dl>
+{{if .Accessible}}<p class="badge">{{t "Есть доступные комнаты"}}</p>{{end}}
+<p class="hint">{{t "Стоимость в минимальных денежных единицах"}}</p><ul class="price-list">{{range .Prices}}<li>{{.Minor}} {{.Currency}} / {{.Period}}</li>{{else}}<li>{{t "Стоимость пока не указана"}}</li>{{end}}</ul>
+<a class="button button-secondary" href="{{url (catalogURL .ID)}}">{{t "Подробнее"}}</a>
+</article>{{else}}<div class="card empty-state"><h2>{{t "Общежития не найдены"}}</h2><p>{{t "Измените фильтры или вернитесь позже."}}</p></div>{{end}}</div>
+<nav class="pagination" aria-label="{{t "Страницы каталога"}}">{{if .Data.Previous}}<a class="button button-secondary" rel="prev" href="{{url (.Data.Previous)}}">{{t "Назад"}}</a>{{end}}{{if .Data.Listing.Pages}}<span>{{t "Страница"}} {{.Data.Listing.Page}} / {{.Data.Listing.Pages}}</span>{{end}}{{if .Data.Next}}<a class="button button-secondary" rel="next" href="{{url (.Data.Next)}}">{{t "Далее"}}</a>{{end}}</nav>
+{{end}}
+{{end}}

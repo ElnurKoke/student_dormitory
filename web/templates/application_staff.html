@@ -1,0 +1,6 @@
+{{define "content"}}
+<nav class="breadcrumbs"><a href="{{url "/account"}}">{{t "Мой кабинет"}}</a></nav><h1>{{if .Data.AssignMode}}{{t "Назначение проверяющего"}}{{else}}{{t "Назначенные заявления"}}{{end}}</h1>
+<p>{{t "Ручная проверка не означает одобрение размещения и не даёт права бронирования."}}</p>
+{{range .Data.Applications}}<article class="card"><h2>{{if $.Data.AssignMode}}{{.Number}}{{else}}<a href="{{url (printf "/staff%s" .URL)}}">{{.Number}}</a>{{end}}</h2><p>{{t .Status.Label}} · {{.SubmittedAt}}</p><p>{{t "Проверяющий"}}: {{.ReviewerID}}</p>
+{{if $.Data.AssignMode}}<form method="post" action="{{url (printf "/staff/application-assignments/%s" .ID)}}"><input type="hidden" name="csrf_token" value="{{$.CSRFToken}}"><input type="hidden" name="version" value="{{.Version}}"><label>{{t "Ответственный проверяющий"}}<select name="reviewer_id" required><option value="">{{t "Выберите проверяющего"}}</option>{{range $.Data.Reviewers}}<option value="{{.ID}}">{{.Name}} · {{.ID}}</option>{{end}}</select></label><button class="button button-primary">{{t "Назначить"}}</button></form>{{end}}</article>{{else}}<p>{{t "Заявлений в этом списке нет."}}</p>{{end}}
+{{end}}

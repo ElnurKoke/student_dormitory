@@ -1,0 +1,6 @@
+{{define "content"}}
+<nav class="breadcrumbs"><a href="{{url "/account"}}">{{t "Мой кабинет"}}</a></nav><h1>{{t "Уведомления"}}</h1>
+{{range .Data.RoleNotifications}}<article class="card"><h2>{{t "Ваша роль изменена"}}</h2><p>{{t "Новая роль:"}} <strong>{{t .RoleName}}</strong></p><p>{{.CreatedAt}}</p>{{if .ReadAt}}<p>{{t "Прочитано"}}: {{.ReadAt}}</p>{{else}}<span class="badge">{{t "Не прочитано"}}</span><form method="post" action="{{url (printf "/account/role-notifications/%d/read" .ID)}}"><input type="hidden" name="csrf_token" value="{{$.CSRFToken}}"><button class="button button-secondary" type="submit">{{t "Отметить прочитанным"}}</button></form>{{end}}</article>{{end}}
+{{range .Data.Notifications}}<article class="card"><h2><a href="{{url .URL}}">{{t .Label}}</a></h2><p>{{.CreatedAt}}</p>{{if .ReadAt}}<p>{{t "Прочитано"}}: {{.ReadAt}}</p>{{else}}<span class="badge">{{t "Не прочитано"}}</span><form method="post" action="{{url (printf "/account/notifications/%d/read" .ID)}}"><input type="hidden" name="csrf_token" value="{{$.CSRFToken}}"><button class="button button-secondary">{{t "Отметить прочитанным"}}</button></form>{{end}}</article>{{end}}
+{{if and (not .Data.Notifications) (not .Data.RoleNotifications)}}<p>{{t "Уведомлений пока нет."}}</p>{{end}}
+{{end}}

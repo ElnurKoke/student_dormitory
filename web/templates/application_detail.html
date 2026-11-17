@@ -1,0 +1,48 @@
+{{define "content"}}
+<nav class="breadcrumbs"><a href="{{url "/account"}}">{{t "Мой кабинет"}}</a> / {{if .Data.Staff}}<a href="{{url "/staff/applications"}}">{{t "Назначенные заявления"}}</a>{{else}}<a href="{{url "/applications"}}">{{t "Мои заявления"}}</a>{{end}}</nav>
+<h1>{{t "Заявление"}} {{.Data.Application.Number}}</h1>
+<p>{{t "Статус"}}: <strong>{{t .Data.Application.Status.Label}}</strong> · {{t "Версия"}} {{.Data.Application.Version}}</p>
+<p>{{t "Статусы — проектное предложение. «Проверено» означает завершение ручной проверки, не одобрение размещения. Очередь, комиссия и право бронирования не реализованы."}}</p>
+{{if .Data.Application.SubmittedAt}}<p>{{t "Дата регистрации"}}: {{.Data.Application.SubmittedAt}}</p>{{end}}
+<section class="card"><h2>{{t "Сведения заявления"}}</h2><p>{{t "Источник каждого поля указан ниже. Ручная проверка заявления не подтверждает сведения через внешние учебные системы."}}</p><dl>
+<dt>{{t "ФИО"}} · {{if .Data.Checks.Name}}{{t "Ручная проверка актуальна"}}{{else}}{{t "Требуется ручная проверка"}}{{end}}</dt><dd>{{.Data.Application.Fields.Name.Value}}<br><small>{{t .Data.Application.Fields.Name.Source}} · {{.Data.Application.Fields.Name.EnteredAt}}</small></dd>
+<dt>Email · {{if .Data.Checks.Email}}{{t "Ручная проверка актуальна"}}{{else}}{{t "Требуется ручная проверка"}}{{end}}</dt><dd>{{.Data.Application.Fields.Email.Value}}<br><small>{{t .Data.Application.Fields.Email.Source}} · {{.Data.Application.Fields.Email.EnteredAt}}</small></dd>
+<dt>{{t "Учебная группа"}} · {{if .Data.Checks.Group}}{{t "Ручная проверка актуальна"}}{{else}}{{t "Требуется ручная проверка"}}{{end}}</dt><dd>{{.Data.Application.Fields.Group.Value}}<br><small>{{t .Data.Application.Fields.Group.Source}} · {{.Data.Application.Fields.Group.EnteredAt}}</small></dd>
+<dt>{{t "Текст заявления"}} · {{if .Data.Checks.Request}}{{t "Ручная проверка актуальна"}}{{else}}{{t "Требуется ручная проверка"}}{{end}}</dt><dd class="application-text">{{.Data.Application.Fields.Request.Value}}<br><small>{{t .Data.Application.Fields.Request.Source}} · {{.Data.Application.Fields.Request.EnteredAt}}</small></dd>
+</dl></section>
+{{if and (not .Data.Staff) .Data.Application.Editable}}
+<p><a class="button button-secondary" href="{{url (printf "%s/edit" .Data.Application.URL)}}">{{t "Исправить сведения"}}</a></p>{{end}}
+{{if and (not .Data.Staff) (or (eq .Data.Application.Status "draft") (eq .Data.Application.Status "needs_information"))}}
+<section class="card"><h2>{{t "Согласие на обработку данных"}}</h2><p>{{t "Версия"}}: {{.Data.Consent.Version}}</p><p>{{.Data.Consent.Body}}</p>
+<form method="post" action="{{url (printf "%s/submit" .Data.Application.URL)}}">
+<input type="hidden" name="csrf_token" value="{{.CSRFToken}}"><input type="hidden" name="version" value="{{.Data.Application.Version}}"><input type="hidden" name="submit_key" value="{{.Data.Application.SubmitKey}}"><input type="hidden" name="consent_version" value="{{.Data.Consent.Version}}">
+<label><input type="checkbox" name="accept_consent" required> {{t "Принимаю указанную версию тестового согласия"}}</label><p>{{t "Отправляется сохранённая версия заявления. Проверьте сведения выше."}}</p><button class="button button-primary">{{t "Отправить заявление"}}</button>
+</form></section>
+{{else if .Data.Application.SubmittedAt}}<section class="card"><h2>{{t "Принятое согласие"}}</h2><p>{{.Data.Application.ConsentVersion}} · {{.Data.Application.ConsentAcceptedAt}}</p><p>{{.Data.Consent.Body}}</p></section>{{end}}
+<section class="card"><h2>{{t "Правило отзыва — проектное предложение"}}</h2><p>{{t "Отзыв разрешён только из статуса «подано», до начала проверки. Отозванное заявление сохраняет номер, дату, согласие и историю; повторная отправка и редактирование недоступны. Отзыв заявления не является отзывом согласия на обработку данных."}}</p>
+{{if and (not .Data.Staff) (eq .Data.Application.Status "submitted")}}<form method="post" action="{{url (printf "%s/withdraw" .Data.Application.URL)}}"><input type="hidden" name="csrf_token" value="{{.CSRFToken}}"><input type="hidden" name="version" value="{{.Data.Application.Version}}"><button class="button button-secondary">{{t "Отозвать заявление"}}</button></form>{{end}}</section>
+<section class="card"><h2>{{t "История рассмотрения"}}</h2><ol>{{range .Data.History}}<li>{{.OccurredAt}} · {{t .Label}} · {{t .Status.Label}} · {{t "Версия"}} {{.Version}} · {{t "Автор"}} {{.ActorID}}</li>{{end}}</ol></section>
+<section class="card" id="documents"><h2>{{t "Электронные документы"}}</h2>
+<p>{{t "PDF, JPEG и PNG до 10 МиБ. Все версии сохраняются. Доступ — только владельцу и назначенному проверяющему."}}</p>
+{{range .Data.Documents}}<article><h3>{{.Label}} · {{t "Версия"}} {{.Version}}{{if .Current}} · {{t "Текущая версия"}}{{end}}</h3><p>{{.MediaType}} · {{.ByteSize}} {{t "байт"}} · {{.UploadedAt}}</p>
+<p>{{if .Checked}}{{t "Ручная проверка актуальна"}}{{else}}{{t "Эта версия требует проверки или заменена"}}{{end}}</p>
+<a href="{{if $.Data.Staff}}{{url (printf "/staff%s" .URL)}}{{else}}{{url .URL}}{{end}}">{{t "Скачать документ"}}</a>
+{{if and (not $.Data.Staff) $.Data.Application.Editable .Current}}<form method="post" enctype="multipart/form-data" action="{{url (printf "%s/documents" $.Data.Application.URL)}}">
+<input type="hidden" name="csrf_token" value="{{$.CSRFToken}}"><input type="hidden" name="version" value="{{$.Data.Application.Version}}"><input type="hidden" name="document_id" value="{{.DocumentID}}">
+<label>{{t "Новая версия"}}<input type="file" name="document" accept=".pdf,.jpg,.jpeg,.png" required></label><button class="button button-secondary">{{t "Загрузить новую версию"}}</button></form>{{end}}
+</article>{{else}}<p>{{t "Документы пока не загружены."}}</p>{{end}}
+{{if and (not .Data.Staff) .Data.Application.Editable}}<form method="post" enctype="multipart/form-data" action="{{url (printf "%s/documents" .Data.Application.URL)}}">
+<input type="hidden" name="csrf_token" value="{{.CSRFToken}}"><input type="hidden" name="version" value="{{.Data.Application.Version}}">
+<label>{{t "Название документа"}}<input name="label" maxlength="120" required></label><label>{{t "Файл документа"}}<input type="file" name="document" accept=".pdf,.jpg,.jpeg,.png" required></label><button class="button button-primary">{{t "Добавить документ"}}</button></form>{{end}}</section>
+{{if and .Data.Staff (eq .Data.Application.Status "under_review")}}<section class="card"><h2>{{t "Результат ручной проверки"}}</h2>
+<p>{{t "Завершение проверки относится ко всем текущим полям и текущим версиям документов. Любые последующие исправления требуют повторной отправки и проверки."}}</p>
+<form method="post" action="{{url (printf "/staff%s/review" .Data.Application.URL)}}"><input type="hidden" name="csrf_token" value="{{.CSRFToken}}"><input type="hidden" name="version" value="{{.Data.Application.Version}}">
+<label>{{t "Результат"}}<select name="result" required><option value="">{{t "Выберите результат"}}</option><option value="needs_information">{{t "Запросить дополнение"}}</option><option value="completed">{{t "Завершить ручную проверку"}}</option></select></label>
+<label>{{t "Комментарий проверяющего"}}<textarea name="comment" maxlength="2000" required rows="4"></textarea></label><label><input type="checkbox" name="confirm_review"> {{t "Все текущие сведения и версии документов проверены вручную"}}</label><button class="button button-primary">{{t "Сохранить результат"}}</button></form></section>{{end}}
+<section class="card"><h2>{{t "Результаты проверок"}}</h2>{{range .Data.Reviews}}<article><h3>{{t .Label}} · {{.OccurredAt}}</h3><p>{{t "Проверяющий"}}: {{.ReviewerID}} · {{t "Версия заявления"}} {{.ApplicationVersion}} · {{t "Редакция сведений"}} {{.ContentRevision}}</p><p class="application-text">{{.Comment}}</p></article>{{else}}<p>{{t "Результатов проверки пока нет."}}</p>{{end}}</section>
+<section class="card"><h2>{{t "История сведений и документов"}}</h2>{{range .Data.Snapshots}}<details><summary>{{t "Версия заявления"}} {{.Version}} · {{.OccurredAt}} · {{.ActorID}}</summary><p>{{t "Проверяющий"}}: {{.ReviewerID}} · {{t "Редакция сведений"}} {{.ContentRevision}}</p><dl>
+<dt>{{t "ФИО"}}</dt><dd>{{.Fields.Name.Value}} · {{.Fields.Name.Source}} · {{.Fields.Name.EnteredAt}}</dd><dt>Email</dt><dd>{{.Fields.Email.Value}} · {{.Fields.Email.Source}} · {{.Fields.Email.EnteredAt}}</dd>
+<dt>{{t "Учебная группа"}}</dt><dd>{{.Fields.Group.Value}} · {{.Fields.Group.Source}} · {{.Fields.Group.EnteredAt}}</dd><dt>{{t "Текст заявления"}}</dt><dd class="application-text">{{.Fields.Request.Value}} · {{.Fields.Request.Source}} · {{.Fields.Request.EnteredAt}}</dd></dl>
+{{range .Documents}}<p>{{t "Версия документа"}} {{.Version}} · <a href="{{if $.Data.Staff}}{{url (printf "/staff%s/documents/%s" $.Data.Application.URL .VersionID)}}{{else}}{{url (printf "%s/documents/%s" $.Data.Application.URL .VersionID)}}{{end}}">{{t "Скачать документ"}}</a></p>{{end}}
+{{if .Comment}}<p class="application-text">{{.Comment}}</p>{{end}}</details>{{end}}</section>
+{{end}}

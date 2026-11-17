@@ -1,0 +1,6 @@
+{{define "content"}}
+<section class="card error-card"><p class="eyebrow">{{t "Ошибка"}} {{.Status}}</p><h1>{{.Title}}</h1><p class="lead">{{.Message}}</p>
+<div class="actions">{{if .Navigation.Authenticated}}<a class="button button-primary" href="{{url "/account"}}">{{t "В мой кабинет"}}</a>{{else if .Navigation.LoginEnabled}}<a class="button button-primary" href="{{url "/auth/login"}}">{{t "Войти в кабинет"}}</a>{{end}}<a class="button button-secondary" href="{{url "/"}}">{{t "На главную"}}</a></div>
+{{if eq .Status 403}}<p class="hint">{{t "Если вам нужен доступ к этому разделу, обратитесь к администратору."}}</p>{{end}}
+</section>
+{{end}}

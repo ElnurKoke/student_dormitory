@@ -1,0 +1,8 @@
+{{define "content"}}
+<nav class="breadcrumbs"><a href="{{url "/account"}}">{{t "Мой кабинет"}}</a> / {{t "Мои заявления"}}</nav>
+<h1>{{t "Мои заявления"}}</h1>
+<p><a href="{{url "/student/profile"}}">{{t "Профиль студента"}}</a></p>
+<p>{{t "Локальный тестовый сценарий. Статусы — проектное предложение. Подача не создаёт очередь или право бронирования."}}</p>
+<form method="post" action="{{url "/applications/new"}}"><input type="hidden" name="csrf_token" value="{{.CSRFToken}}"><button class="button button-primary">{{t "Создать черновик"}}</button></form>
+<div class="card-grid">{{range .Data.Applications}}<article class="card"><h2><a href="{{url .URL}}">{{t "Заявление"}} {{.Number}}</a></h2><p>{{t .Status.Label}}</p><p>{{t "Создано"}}: {{.CreatedAt}}</p>{{if .SubmittedAt}}<p>{{t "Дата регистрации"}}: {{.SubmittedAt}}</p>{{end}}</article>{{else}}<p>{{t "Заявлений пока нет."}}</p>{{end}}</div>
+{{end}}

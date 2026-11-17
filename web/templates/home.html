@@ -1,0 +1,20 @@
+{{define "content"}}
+<section class="hero">
+  <div><p class="eyebrow">{{t "Единое пространство общежитий"}}</p><h1>{{t "Учёт фонда и каталог общежитий"}}</h1><p class="lead">{{t "Ваши доступные разделы и назначенные общежития — в одном месте."}}</p>
+    <div class="actions"><a class="button button-primary" href="{{url "/catalog"}}">{{t "Открыть каталог"}}</a>{{if .Navigation.Authenticated}}<a class="button button-primary" href="{{url "/account"}}">{{t "Открыть мой кабинет"}}</a>{{else if .Navigation.LoginEnabled}}<a class="button button-primary" href="{{url "/auth/login"}}">{{t "Войти в кабинет"}}</a>{{else}}<p class="notice">{{t "Вход сейчас недоступен. Обратитесь к администратору."}}</p>{{end}}</div>
+  </div>
+  <aside class="card hero-aside"><span class="badge">{{t "Первый этап"}}</span><h2>{{t "Удобный доступ к вашему рабочему пространству"}}</h2><p>{{t "После входа меню покажет разделы, доступные вашей роли."}}</p>{{if .Navigation.Authenticated}}<p class="muted">{{t "Вы вошли как"}} {{.Navigation.DisplayName}}.</p>{{end}}</aside>
+</section>
+{{if .Navigation.Authenticated}}
+<section aria-labelledby="quick-links"><div class="section-heading"><h2 id="quick-links">{{t "Быстрый переход"}}</h2></div><div class="card-grid">
+  <a class="card action-card" href="{{url "/account"}}"><span class="card-kicker">{{t "Личный раздел"}}</span><h3>{{t "Мой кабинет"}} <span aria-hidden="true">→</span></h3><p>{{t "Профиль, роль и доступные разделы."}}</p></a>
+  {{range .Navigation.Dormitories}}<a class="card action-card" href="{{url (.URL)}}"><span class="card-kicker">{{t "Назначенное общежитие"}}</span><h3>{{.Label}} <span aria-hidden="true">→</span></h3><p>{{t "Открыть рабочее место фонда."}}</p></a>{{end}}
+  {{if .Navigation.CanReadUsers}}<a class="card action-card" href="{{url "/admin/users"}}"><span class="card-kicker">{{t "Управление доступом"}}</span><h3>{{t "Учётные записи"}} <span aria-hidden="true">→</span></h3><p>{{t "Просмотр и поиск пользователей."}}</p></a>{{end}}
+</div></section>
+{{end}}
+<section class="section-space" aria-labelledby="availability"><h2 id="availability">{{t "Разделы первого этапа"}}</h2><p class="muted">{{t "Реестр доступен назначенным сотрудникам. В реестре доступны комнаты, койко-места и история административных статусов. Публичный каталог доступен без входа. Статистика доступна сотрудникам с соответствующими правами."}}</p><div class="card-grid">
+  <a class="card action-card" href="{{url "/catalog"}}"><span class="badge">{{t "Открытый доступ"}}</span><h3>{{t "Каталог общежитий"}}</h3><p>{{t "Характеристики комнат, фотографии и доступность мест."}}</p></a>
+  <div class="card"><span class="badge">{{t "Общежития и комнаты"}}</span><h3>{{t "Реестр фонда"}}</h3><p>{{t "Общежития → корпуса → этажи → комнаты → койко-места. Фотографии и история статусов доступны в карточках объектов."}}</p>{{if .Navigation.Dormitories}}<a href="{{url "/staff/dormitories"}}" class="button button-secondary">{{t "Открыть реестр"}}</a>{{else if and .Navigation.LoginEnabled (not .Navigation.Authenticated)}}<a href="{{url "/auth/login"}}" class="button button-secondary">{{t "Войти для работы с реестром"}}</a>{{end}}</div>
+  <div class="card"><h3>{{t "Статистика"}}</h3><p>{{t "Сведения о количестве и статусах мест."}}</p>{{if .Navigation.CanReadStatistics}}<a class="button button-secondary" href="{{url "/staff/statistics"}}">{{t "Статистика реестра"}}</a>{{end}}</div>
+</div></section>
+{{end}}

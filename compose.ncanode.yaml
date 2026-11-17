@@ -1,0 +1,29 @@
+name: student-dormitory-nca
+services:
+  ncanode:
+    # Native amd64/arm64 image, pinned to the verified release manifest.
+    image: malikzh/ncanode@sha256:052222f30ac73d9f0060a5c80c572723d25dd84e21073435795a10db254c02b8
+    container_name: student-dormitory-ncanode
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:14579:14579"
+    environment:
+      JAVA_OPTS: "-Xms128m -Xmx512m"
+      NCANODE_DEBUG: "false"
+      NCANODE_TRACING_ENABLED: "false"
+      LOGGING_LEVEL_ROOT: "OFF"
+    volumes:
+      - ncanode_cache:/app/cache
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:14579/actuator/health"]
+      interval: 20s
+      timeout: 10s
+      retries: 6
+      start_period: 60s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+volumes:
+  ncanode_cache:

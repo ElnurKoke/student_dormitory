@@ -1,0 +1,45 @@
+{{define "content"}}
+<nav class="breadcrumbs" aria-label="{{t "Хлебные крошки"}}"><a href="{{url "/"}}">{{t "Главная"}}</a><span aria-hidden="true">/</span><span aria-current="page">{{t "Вход"}}</span></nav>
+<div class="login-layout">
+  <section class="card login-card" aria-labelledby="login-title"><p class="eyebrow">{{t "Личный кабинет"}}</p><h1 id="login-title">{{.Title}}</h1>
+    {{if .Message}}<div class="alert alert-error" role="alert" id="login-error">{{.Message}}</div>{{end}}
+    <p>{{t "Войдите с ЭЦП НУЦ РК. Логин и пароль сайта не нужны."}}</p>
+    {{if .Data.EDSEnabled}}
+    <form id="eds-login" class="stack-form" action="{{url "/auth/eds/login"}}" method="post"
+      data-session-url="{{url "/auth/login"}}" data-challenge-url="{{url "/auth/eds/challenge"}}" data-account-url="{{url "/account"}}" data-locale="{{lang}}"
+      data-msg-checking="{{t "Проверяем подключение к NCALayer…"}}"
+      data-msg-connected="{{t "NCALayer запущен"}}"
+      data-msg-disconnected="{{t "Не удалось подключиться к NCALayer. Запустите приложение и разрешите браузеру доступ к локальной сети, затем повторите проверку."}}"
+      data-msg-signing="{{t "Выберите хранилище и введите пароль от ключа в окне NCALayer."}}"
+      data-msg-verifying="{{t "Проверяем подпись…"}}"
+      data-msg-cancelled="{{t "Вход отменён. Вы можете попробовать снова."}}"
+      data-msg-sign-error="{{t "NCALayer не вернул подпись. Повторите попытку с действующим сертификатом."}}"
+      data-msg-session-expired="{{t "Сеанс входа истёк. Обновите страницу и повторите вход с ЭЦП."}}"
+      data-msg-server-error="{{t "Не удалось выполнить вход. Повторите попытку."}}">
+      <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+      <p id="ncalayer-status" class="notice" role="status" aria-live="polite">{{t "Проверяем подключение к NCALayer…"}}</p>
+      <button id="ncalayer-check" class="button button-secondary" type="button">{{t "Проверить NCALayer"}}</button>
+      <div id="eds-error" class="alert alert-error" role="alert" hidden></div>
+      <button id="eds-submit" class="button button-primary full-width" type="submit" disabled>{{t "Войти с ЭЦП"}}</button>
+      <noscript><p class="alert">{{t "Для входа с ЭЦП включите JavaScript в браузере."}}</p></noscript>
+    </form>
+    <script src="{{url "/static/ncalayer-login.js"}}" defer></script>
+    {{else}}<p class="notice">{{t "Вход с ЭЦП пока не настроен. Обратитесь к администратору сайта."}}</p><button class="button button-primary full-width" type="button" disabled>{{t "Войти с ЭЦП"}}</button>{{end}}
+    {{if .Data.DevelopmentEnabled}}
+    <hr class="login-divider"><h2>{{t "Тестовый вход"}}</h2><p class="muted" id="login-help">{{t "Введите выданные вам логин и пароль."}}</p>
+    <form action="{{url "/auth/login"}}" method="post" class="stack-form">
+      <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+      <div class="field"><label for="login">{{t "Логин"}}</label><input id="login" name="login" value="{{.LoginValue}}" autocomplete="username" autocapitalize="none" spellcheck="false" maxlength="128" aria-describedby="login-help{{if .Message}} login-error{{end}}" {{if .Message}}aria-invalid="true"{{end}} required></div>
+      <div class="field"><label for="password">{{t "Пароль"}}</label><input id="password" name="password" type="password" autocomplete="current-password" maxlength="128" {{if .Message}}aria-describedby="login-error" aria-invalid="true"{{end}} required></div>
+      <button class="button button-secondary full-width" type="submit">{{t "Войти в кабинет"}}</button>
+    </form>{{end}}
+    <p class="text-link"><a href="{{url "/"}}">{{t "Вернуться на главную"}}</a></p>
+  </section>
+  <aside class="login-aside"><span class="badge">{{t "Вход с ЭЦП"}}</span><h2>{{t "Как войти"}}</h2>
+    <ol><li><a href="https://pki.gov.kz/ru/ncalayer/" target="_blank" rel="noopener noreferrer">{{t "Установите NCALayer с сайта НУЦ РК."}}</a></li><li>{{t "Запустите NCALayer и проверьте подключение."}}</li><li>{{t "Нажмите «Войти с ЭЦП», выберите ключ и введите его пароль в NCALayer."}}</li></ol>
+    <p>{{t "Если ИИН ещё не зарегистрирован, кабинет создастся автоматически с ролью студента. Существующие роли сохраняются."}}</p>
+    <p>{{t "ФИО, ИИН и email, если он указан, заполняются из проверенного сертификата."}}</p>
+    <p class="muted">{{t "Пароль от ключа и закрытый ключ остаются в NCALayer и не передаются сайту."}}</p>
+  </aside>
+</div>
+{{end}}

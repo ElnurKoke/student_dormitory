@@ -1,0 +1,29 @@
+{{define "content"}}
+<nav class="breadcrumbs"><a href="{{url "/account"}}">{{t "Мой кабинет"}}</a> / <a href="{{url "/applications"}}">{{t "Мои заявления"}}</a></nav>
+<h1>{{.Title}}</h1>
+<p>{{t "Источник и дата указаны для каждого поля. Сведения, изменённые вручную, сохраняются как введённые студентом."}}</p>
+{{if .Message}}<p class="notice" role="alert">{{.Message}}</p>{{end}}
+{{if .Data.EditMode}}<p>{{t "Это отдельный снимок профиля. Изменение профиля не меняет сохранённое заявление."}}</p>{{end}}
+<form method="post" action="{{if .Data.ProfileMode}}{{url "/student/profile"}}{{else}}{{url (printf "%s/edit" .Data.Application.URL)}}{{end}}" class="card">
+<input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+<input type="hidden" name="version" value="{{if .Data.ProfileMode}}{{.Data.Profile.Version}}{{else}}{{.Data.Application.Version}}{{end}}">
+{{if .Data.ProfileMode}}<div class="field">
+<label for="student-iin">{{t "ИИН"}} (IIN)</label>
+<input id="student-iin" value="{{.Data.Profile.IIN.Value}}" readonly inputmode="numeric" maxlength="12" aria-describedby="student-iin-help">
+<p class="hint" id="student-iin-help">{{if .Data.Profile.IIN.Value}}{{t "ИИН заполнен из проверенного сертификата ЭЦП."}}{{else}}{{t "ИИН заполнится автоматически после входа с ЭЦП."}}{{end}}</p>
+</div>{{end}}
+<label for="student-name">{{t "ФИО"}}</label><input id="student-name" name="name" maxlength="200" value="{{.Data.Input.Name}}" autocomplete="name">
+<label for="student-email">Email</label><input id="student-email" type="email" name="email" maxlength="254" value="{{.Data.Input.Email}}" autocomplete="email">
+<label for="student-group">{{t "Учебная группа"}}</label><input id="student-group" name="group" maxlength="100" value="{{.Data.Input.Group}}">
+{{if .Data.EditMode}}<label for="student-request">{{t "Текст заявления о предоставлении общежития"}}</label><textarea id="student-request" name="request" maxlength="2000" rows="6">{{.Data.Input.Request}}</textarea>{{end}}
+{{if and .Data.EditMode (ne .Data.Application.Status "draft")}}<p>{{t "Исправления сохраняются без отправки. Изменённые сведения требуют повторной отправки и ручной проверки; прежние результаты остаются в истории."}}</p>{{else}}<p>{{t "Черновик можно сохранить неполным. Для отправки обязательны все поля."}}</p>{{end}}
+<button class="button button-primary">{{t "Сохранить"}}</button>
+<a class="button button-secondary" href="{{if .Data.ProfileMode}}{{url "/applications"}}{{else}}{{url .Data.Application.URL}}{{end}}">{{t "Вернуться"}}</a>
+</form>
+{{if .Data.ProfileMode}}<section class="card"><h2>{{t "Источники полей"}}</h2><dl>
+{{if .Data.Profile.IIN.Value}}<dt>{{t "ИИН"}} (IIN)</dt><dd>{{t .Data.Profile.IIN.Source}} · {{.Data.Profile.IIN.EnteredAt}}</dd>{{end}}
+<dt>{{t "ФИО"}}</dt><dd>{{t .Data.Profile.Fields.Name.Source}} · {{.Data.Profile.Fields.Name.EnteredAt}}</dd>
+<dt>Email</dt><dd>{{t .Data.Profile.Fields.Email.Source}} · {{.Data.Profile.Fields.Email.EnteredAt}}</dd>
+<dt>{{t "Учебная группа"}}</dt><dd>{{t .Data.Profile.Fields.Group.Source}} · {{.Data.Profile.Fields.Group.EnteredAt}}</dd>
+</dl></section>{{end}}
+{{end}}

@@ -1,0 +1,12 @@
+{{define "content"}}
+<nav class="breadcrumbs" aria-label="{{t "Хлебные крошки"}}"><a href="{{url "/staff/dormitories"}}">{{t "Реестр фонда"}}</a><span>/</span><a href="{{url (.Data.CancelURL)}}">{{t "Койко-место"}} {{.Data.Node.Label}}</a><span>/</span><span aria-current="page">{{t "Изменение статуса"}}</span></nav>
+<h1>{{t "Изменение статуса ·"}} {{.Data.Node.Label}}</h1>
+<p>{{t "Текущий статус:"}} <strong>{{t .Data.Node.Status.Label}}</strong>{{t ". Версия:"}} {{.Data.Node.Version}}.</p>
+{{if .Data.Errors}}<div class="alert alert-error" role="alert"><h2>{{t "Проверьте данные"}}</h2><ul>{{range $field,$message := .Data.Errors}}<li>{{t $message}}</li>{{end}}</ul>{{if index .Data.Errors "_form"}}<a href="{{url (.Data.ActionURL)}}">{{t "Обновить форму с актуальными данными"}}</a>{{end}}</div>{{end}}
+<section class="card section-space"><form class="stack-form" method="post" action="{{url (.Data.ActionURL)}}">
+<input type="hidden" name="csrf_token" value="{{.CSRFToken}}"><input type="hidden" name="version" value="{{.Data.Version}}">
+<div class="field"><label for="status">{{t "Новый статус *"}}</label><select id="status" name="status" required{{if index .Data.Errors "status"}} aria-invalid="true"{{end}}><option value="">{{t "Выберите статус"}}</option>{{range .Data.Node.Status.ManualTargets}}<option value="{{.}}" {{if eq . $.Data.NextStatus}}selected{{end}}>{{t .Label}}</option>{{end}}</select></div>
+<div class="field"><label for="basis">{{t "Основание *"}}</label><textarea id="basis" name="basis" required maxlength="1000" rows="4"{{if index .Data.Errors "basis"}} aria-invalid="true"{{end}}>{{.Data.Basis}}</textarea><p class="hint">{{t "Укажите реквизиты акта или иное основание. Автор и время будут записаны автоматически."}}</p></div>
+<div class="actions"><button class="button button-primary" type="submit">{{t "Сохранить статус"}}</button><a class="button button-secondary" href="{{url (.Data.CancelURL)}}">{{t "Отмена"}}</a></div>
+</form></section>
+{{end}}
